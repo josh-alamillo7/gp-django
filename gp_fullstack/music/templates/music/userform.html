@@ -1,0 +1,8 @@
+<h1>Submit your song information to our database!</h1>
+
+<form action="./userform" method="post">
+  {% csrf_token %}
+  {{ form }}
+<input type="submit" value="Submit information">
+</form>
+
