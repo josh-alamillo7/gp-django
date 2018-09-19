@@ -17,10 +17,15 @@ def songinfo(request, song_id):
 def userform(request):
 
   def save_play_count(instance, **kwargs):
-    new_play_count = PlayCount(song=new_song, user=current_user, plays=play_count)
+    new_play_count = PlayCount(song=instance, user=current_user, plays=play_count)
     new_play_count.save()
 
+  def save_song_after_artist(instance, **kwargs):
+    new_song = Song(title=title, artist=instance, plays=play_count)
+    new_song.save()
+
   post_save.connect(save_play_count, sender=Song)
+  post_save.connect(save_song_after_artist, sender=Artist)
 
   if request.method == 'POST':
     form = UserForm(request.POST)
@@ -42,10 +47,10 @@ def userform(request):
           #new_song.save()
           #new_play_count.save()
 
-
       else:
         new_artist = Artist(name=artist)
         new_artist.save()
+
       #Add to database logic
       #if Artist.objects.filter(Name=)
   else:
