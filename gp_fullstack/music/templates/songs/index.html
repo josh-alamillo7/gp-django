@@ -1,0 +1,11 @@
+<h1>Top 20 most played songs in our database</h1>
+
+{% if most_played_list %}
+<ul>
+  {% for song in most_played_list %}
+    <li><a href='./songs/{{ song.id }}'>{{song.title}}</a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<strong>No songs yet.</strong>
+{% endif %}
