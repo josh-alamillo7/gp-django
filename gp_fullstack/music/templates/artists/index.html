@@ -1,0 +1,11 @@
+<h1>Browse songs by artist</h1>
+
+{% if artist_list %}
+<ul>
+  {% for artist in artist_list %}
+    <li><a href="./artists/{{ artist.id }}">{{artist.name}}</a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<strong>No artists yet.</strong>
+{% endif %}

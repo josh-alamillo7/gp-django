@@ -72,8 +72,14 @@ def userform(request):
     form = UserForm()
   return render(request, 'music/userform.html', {'form': form})
 
+def artist_list(request):
+  print('ARTIST', Artist)
+  artist_list = Artist.objects.order_by('name')
+  print('ARTIST LIST', artist_list)
+  return render(request, 'artists/index.html', {'artist_list': artist_list})
+
+def most_played_list(request):
+  pass
+
 def artist(request, artist_id):
   return HttpResponse('This will list all the songs for artist %s.' % artist_id)
-
-def genre(request, genre_id):
-  return HttpResponse('This will list all the songs for genre %s.' % genre_id)
