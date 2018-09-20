@@ -89,8 +89,12 @@ def artist_list(request):
   return render(request, 'artists/index.html', {'artist_list': artist_list})
 
 def most_played_list(request):
-  most_played_list = Song.objects.order_by('plays')[:20]
+  most_played_list = Song.objects.order_by('-plays')[:20]
   return render(request, 'songs/index.html', {'most_played_list': most_played_list})
 
 def artist(request, artist_id):
-  return HttpResponse('This will list all the songs for artist %s.' % artist_id)
+  artist = get_object_or_404(Artist, pk=artist_id)
+  artist_name = artist.name
+  song_list = Song.objects.filter(artist_id=artist_id).order_by('-plays')[:15]
+
+  return render(request, 'artists/detail.html', {'artist_name': artist_name, 'song_list': song_list})
