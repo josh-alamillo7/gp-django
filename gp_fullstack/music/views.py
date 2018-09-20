@@ -1,14 +1,50 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.db.models.signals import post_save
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.models import User as AuthUser
 
 from .models import User, Artist, Genre, Song, PlayCount
-from .forms import UserForm
+from .forms import UserForm, LoginForm
+from .config import config
 
 # Create your views here.
 
+def login(request):
+  
+  if request.method == 'POST':
+    form = LoginForm(request.POST)
+    if form.is_valid():
+      submitted_username = form.cleaned_data['username']
+      submitted_password = form.cleaned_data['password']
+
+      #from here, it means the password was correct
+      if AuthUser.objects.filter(username=submitted_username).exists() != True:
+        new_auth_user = AuthUser.objects.create_user(submitted_username, config['APP_EMAIL'], config['APP_PW'])
+
+      authenticated_user = authenticate(request, username=submitted_username, password=submitted_password)
+      if authenticated_user is not None:
+        auth_login(request, authenticated_user)
+        if User.objects.filter(name = submitted_username).exists() != True:
+          new_user = User(name = submitted_username)
+          new_user.save()   
+        return render(request, 'music/index.html')
+      else:
+        return render(request, 'login/index.html', {'form': form})
+
+           
+        #if the user that logged in doesn't exist yet, add them to our database and create a (Django) user object for them.
+
+    #some authentication logic and processes
+    
+  else:
+    form = LoginForm()
+    return render(request, 'login/index.html', {'form': form})
+
 def index(request):
-  return HttpResponse('Some placeholder index.. welcome page and buttons or something')
+
+  return render(request, 'music/index.html')
   #Submit a song, browse songs by genre, browse songs by artist, get a music taste breakdown report.
 
 def songinfo(request, song_id):
@@ -49,7 +85,7 @@ def userform(request):
     form = UserForm(request.POST)
     if form.is_valid():
       #later, get the current user info somehow
-      current_user = User.objects.filter(name='Randy66')[0]
+      current_user = User.objects.filter(name=request.user.username)[0]
       artist = form.cleaned_data['artist']
       title = form.cleaned_data['title']
       play_count = form.cleaned_data['play_count']

@@ -1,4 +1,5 @@
 /django
 /gp_fullstack/gp_fullstack/config.py
+/gp_fullstack/music/config.py
 
 *.pyc
