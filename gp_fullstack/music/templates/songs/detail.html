@@ -1,0 +1,10 @@
+{% if song_title %}
+  <h1> Top listeners for "{{ song_title }}" by {{ song_artist }}:</h1>
+  <ol>
+    {% for listener in top_listeners %}
+    <li>{{ listener.user }}: {{ listener.play_count }} plays</li>
+    {% endfor %}
+  </ol>
+{% else %}
+{% endif %}
+
