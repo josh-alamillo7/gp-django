@@ -3,12 +3,42 @@ from django.http import HttpResponse
 from django.db.models.signals import post_save
 
 from .models import User, Artist, Genre, Song, PlayCount
-from .forms import UserForm
+from .forms import UserForm, LoginForm
+from .config import config
 
 # Create your views here.
 
+def login(request):
+  
+  if request.method == 'POST':
+    form = LoginForm(request.POST)
+    if form.is_valid():
+      submitted_username = form.cleaned_data['username']
+      submitted_password = form.cleaned_data['password']
+      different_chars = 0
+
+      #password validation
+      if len(config['APP_PW']) != len(submitted_password):
+        return render(request, 'login/index.html', {'form': form})
+      for index in range(0, len(config['APP_PW'])):
+        if submitted_password[index] != config['APP_PW'][index]:
+          different_chars = different_chars + 1
+      if different_chars > 0:
+        print('chars')
+        return render(request, 'login/index.html', {'form': form})
+
+
+
+
+    #some authentication logic and processes
+    return render(request, 'music/index.html')
+  else:
+    form = LoginForm()
+    return render(request, 'login/index.html', {'form': form})
+
 def index(request):
-  return HttpResponse('Some placeholder index.. welcome page and buttons or something')
+
+  return render(request, 'music/index.html')
   #Submit a song, browse songs by genre, browse songs by artist, get a music taste breakdown report.
 
 def songinfo(request, song_id):
@@ -49,7 +79,7 @@ def userform(request):
     form = UserForm(request.POST)
     if form.is_valid():
       #later, get the current user info somehow
-      current_user = User.objects.filter(name='Randy66')[0]
+      current_user = User.objects.filter(name='Claudia54')[0]
       artist = form.cleaned_data['artist']
       title = form.cleaned_data['title']
       play_count = form.cleaned_data['play_count']
