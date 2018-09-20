@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.db.models.signals import post_save
 
@@ -12,7 +12,19 @@ def index(request):
   #Submit a song, browse songs by genre, browse songs by artist, get a music taste breakdown report.
 
 def songinfo(request, song_id):
-  return HttpResponse('This is the song info page for %s.' % song_id)
+
+  top_listeners = []
+  song = get_object_or_404(Song, pk=song_id)
+  song_title = song.title
+  song_artist = Artist.objects.filter(id=song.artist_id)[0].name
+  matching_playcounts = PlayCount.objects.order_by('-plays').filter(song_id=song_id)[:20]
+
+  for count in matching_playcounts:
+    matching_user = User.objects.filter(id=count.user_id)[0]
+    top_listeners.append({'user': matching_user.name, 'play_count': count.plays})
+
+  return render(request, 'songs/detail.html', {'top_listeners': top_listeners, 
+    'song_title': song_title, 'song_artist': song_artist})
 
 def userform(request):
 
