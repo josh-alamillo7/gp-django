@@ -3,7 +3,9 @@ from django.http import HttpResponse
 from django.db.models.signals import post_save
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User as AuthUser
+from django.contrib.auth.decorators import login_required
 
 from .models import User, Artist, Genre, Song, PlayCount
 from .forms import UserForm, LoginForm
@@ -42,6 +44,7 @@ def login(request):
     form = LoginForm()
     return render(request, 'login/index.html', {'form': form})
 
+@login_required(login_url='./login')
 def index(request):
 
   return render(request, 'music/index.html')
@@ -85,6 +88,7 @@ def userform(request):
     form = UserForm(request.POST)
     if form.is_valid():
       #later, get the current user info somehow
+      print(request.user.username)
       current_user = User.objects.filter(name=request.user.username)[0]
       artist = form.cleaned_data['artist']
       title = form.cleaned_data['title']
@@ -134,3 +138,7 @@ def artist(request, artist_id):
   song_list = Song.objects.filter(artist_id=artist_id).order_by('-plays')[:15]
 
   return render(request, 'artists/detail.html', {'artist_name': artist_name, 'song_list': song_list})
+
+def logout(request):
+  auth_logout(request)
+  return render(request, 'login/index.html')
