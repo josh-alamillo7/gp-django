@@ -50,6 +50,7 @@ def index(request):
   return render(request, 'music/index.html')
   #Submit a song, browse songs by genre, browse songs by artist, get a music taste breakdown report.
 
+@login_required(login_url='./login')
 def songinfo(request, song_id):
 
   top_listeners = []
@@ -65,6 +66,7 @@ def songinfo(request, song_id):
   return render(request, 'songs/detail.html', {'top_listeners': top_listeners, 
     'song_title': song_title, 'song_artist': song_artist})
 
+@login_required(login_url='./login')
 def userform(request):
 
   title = None
@@ -124,14 +126,17 @@ def userform(request):
     form = UserForm()
   return render(request, 'music/userform.html', {'form': form})
 
+@login_required(login_url='./login')
 def artist_list(request):
   artist_list = Artist.objects.order_by('name')
   return render(request, 'artists/index.html', {'artist_list': artist_list})
 
+@login_required(login_url='./login')
 def most_played_list(request):
   most_played_list = Song.objects.order_by('-plays')[:20]
   return render(request, 'songs/index.html', {'most_played_list': most_played_list})
 
+@login_required(login_url='./login')
 def artist(request, artist_id):
   artist = get_object_or_404(Artist, pk=artist_id)
   artist_name = artist.name
@@ -139,6 +144,8 @@ def artist(request, artist_id):
 
   return render(request, 'artists/detail.html', {'artist_name': artist_name, 'song_list': song_list})
 
+@login_required(login_url='./login')
 def logout(request):
   auth_logout(request)
-  return render(request, 'login/index.html')
+  form = LoginForm()
+  return render(request, 'login/index.html', {'form': form})
