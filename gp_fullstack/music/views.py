@@ -122,6 +122,7 @@ def userform(request):
       else:
         new_artist = Artist(name=artist)
         new_artist.save()
+      return render(request, 'music/success.html')
   else:
     form = UserForm()
   return render(request, 'music/userform.html', {'form': form})
@@ -174,7 +175,8 @@ def mail(request):
   for count in user_play_counts:
     current_song = Song.objects.filter(id=count.song_id)[0]
     current_artist = str(Artist.objects.filter(id=current_song.artist_id)[0])
-    current_genre = str(Genre.objects.filter(id=current_song.genre_id)[0])
+    if Genre.objects.filter(id=current_song.genre_id).exists():
+      current_genre = str(Genre.objects.filter(id=current_song.genre_id)[0])
     if current_artist in artist_counts.keys():
       artist_counts[current_artist] = artist_counts[current_artist] + count.plays
     else:
@@ -195,6 +197,7 @@ def mail(request):
 
   mailtext = 'Hi ' + username + ', \n \n Thank you for your interest in receiving a listener report! Our current service informs a user of their most-played artist and genre. In the future as our app grows, you will receive some nice graphs representing more detailed information! Currently, your most-played artist is ' + max_artist + ' and your most-played genre is ' + max_genre + '. Thanks again for using the app! \n Best, \n Josh'
 
+  print(mailtext)
   #sending mail doesn't work yet, but let's try and deploy this first.
   #send_mail('Your personalized music report', mailtext, useremail, [useremail], fail_silently=False,)
 
