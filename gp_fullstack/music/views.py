@@ -6,6 +6,7 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User as AuthUser
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 
 from .models import User, Artist, Genre, Song, PlayCount
 from .forms import UserForm, LoginForm
@@ -90,7 +91,6 @@ def userform(request):
     form = UserForm(request.POST)
     if form.is_valid():
       #later, get the current user info somehow
-      print(request.user.username)
       current_user = User.objects.filter(name=request.user.username)[0]
       artist = form.cleaned_data['artist']
       title = form.cleaned_data['title']
@@ -149,3 +149,53 @@ def logout(request):
   auth_logout(request)
   form = LoginForm()
   return render(request, 'login/index.html', {'form': form})
+
+@login_required(login_url='./login')
+def mailrequest(request):
+  return render(request, 'request/index.html')
+
+@login_required(login_url='./login')
+def mail(request):
+
+  #mail functionality
+  username = request.user.username
+  useremail = request.user.email
+
+  user_id = User.objects.filter(name=username)[0].id
+  user_play_counts = PlayCount.objects.filter(user_id=user_id)
+
+  genre_counts = {}
+  artist_counts = {}
+  max_genre_count = 0
+  max_artist_count = 0
+  max_genre = None
+  max_artist = None
+
+  for count in user_play_counts:
+    current_song = Song.objects.filter(id=count.song_id)[0]
+    current_artist = str(Artist.objects.filter(id=current_song.artist_id)[0])
+    current_genre = str(Genre.objects.filter(id=current_song.genre_id)[0])
+    if current_artist in artist_counts.keys():
+      artist_counts[current_artist] = artist_counts[current_artist] + count.plays
+    else:
+      artist_counts[current_artist] = count.plays
+    if current_genre in genre_counts.keys():
+      genre_counts[current_genre] = genre_counts[current_genre] + count.plays
+    else:
+      genre_counts[current_genre] = count.plays
+
+  for artist in artist_counts:
+    if artist_counts[artist] > max_artist_count:
+      max_artist = artist
+      max_artist_count = artist_counts[artist]
+  for genre in genre_counts:
+    if genre_counts[genre] > max_genre_count:
+      max_genre = genre
+      max_genre_count = genre_counts[genre]
+
+  mailtext = 'Hi ' + username + ', \n \n Thank you for your interest in receiving a listener report! Our current service informs a user of their most-played artist and genre. In the future as our app grows, you will receive some nice graphs representing more detailed information! Currently, your most-played artist is ' + max_artist + ' and your most-played genre is ' + max_genre + '. Thanks again for using the app! \n Best, \n Josh'
+
+  #sending mail doesn't work yet, but let's try and deploy this first.
+  #send_mail('Your personalized music report', mailtext, useremail, [useremail], fail_silently=False,)
+
+  return render(request, 'request/confirm.html')

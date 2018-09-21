@@ -11,4 +11,6 @@ urlpatterns = [
   path('artists', views.artist_list),
   path('songs', views.most_played_list),
   path('logout', views.logout),
+  path('mailrequest', views.mailrequest),
+  path('mail', views.mail),
 ]
