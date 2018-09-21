@@ -149,3 +149,12 @@ def logout(request):
   auth_logout(request)
   form = LoginForm()
   return render(request, 'login/index.html', {'form': form})
+
+@login_required(login_url='./login')
+def mailrequest(request):
+  return render(request, 'request/index.html')
+
+@login_required(login_url='./login')
+def mail(request):
+
+  return render(request, 'request/confirm.html')
